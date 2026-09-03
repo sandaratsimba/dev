@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Stripe Payment Element Test</title>
+  <script src="https://js.stripe.com/v3"></script>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 30px; }
+    #payment-element { margin-bottom: 20px; }
+    #submit {
+      background: #5469d4; color: #fff; border: none;
+      border-radius: 4px; padding: 10px 15px; font-size: 16px;
+      cursor: pointer;
+    }
+    #submit:disabled { opacity: 0.5; cursor: not-allowed; }
+    #error-message { color: red; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h2>Payment with Payment Element</h2>
+
+  <form id="payment-form" style="width:500px">
+    <div id="payment-element"><!-- Stripe injectera son UI --></div>
+    <button id="submit">Submit Payment</button>
+    <div id="error-message"></div>
+  </form>
+
+  <script>
+    const stripe = Stripe("pk_test_51Mb2i6E71IYytE7r655dX720ARtZaBmrYMVV6GBgNkQXpPOp7o638GFJuGgR86iGdBGPcXbpfc8c5AMVs2j5WnZO00tI2njFd9");
+	
+	<!-- Testing BT sbx -->
+	<!-- pk_test_51TTrPVCknEa5POb3nCs4d3pIH5s699MQfQYKoFVTc9DJw3LSH2PnXxNdsG9sMTQfZqhpaW60LsRHV89xEmUBgm4900uc2jHixT -->
+	
+	<!-- EU pk_test_51Mb2i6E71IYytE7r655dX720ARtZaBmrYMVV6GBgNkQXpPOp7o638GFJuGgR86iGdBGPcXbpfc8c5AMVs2j5WnZO00tI2njFd9 -->
+	
+	<!-- US pk_test_KoYSGxjpeJnfg8L2hgzmPnmv -->
+	
+	<!-- JP pk_test_51HeLdDJTJMIxsQLdQnzZBtXjOVnkAkOuLQP85OSeES7Njk8X6kzCpdXXHFh657FiPwKvKMD4QWsMXBcXJlW7zRcj00B8TeA9ZM -->
+
+    async function init() {
+      // ⚠️ Ici tu dois appeler ton backend qui crée un PaymentIntent
+      // Pour le test rapide, on simule une réponse
+	  // ideal: pi_3SopInE71IYytE7r1RjTMzW5_secret_nMOVYPZP2Fgte45EcQgtWwYX3
+      const clientSecret = "pi_3TwNNDE71IYytE7r1AocOpPe_secret_UzZA9M3QhU2XAajGdY2yBnojc";
+	  const customerSessionClientSecret = "cuss_secret_UwFs2slCSEjGP0eXVNrNdmcNSEh9auTD6H31pO583tmVafa";
+
+	// mode classic: recommended options (dynamic payment method)
+      const elements = stripe.elements({ clientSecret, customerSessionClientSecret, allowsDelayedPaymentMethods: true });
+	  
+	  // mode deffered: (limitation the select payment method can be not supported)
+	  <!-- const options = { -->
+		  <!-- mode: 'payment', -->
+		  <!-- currency: 'eur', -->
+		  <!-- amount: 1099, -->
+		<!-- }; -->
+		
+      <!-- const elements = stripe.elements( options ); -->
+	  
+	  /*
+user1:Ower company => customer_id1
+		company => customer_id_common
+		
+user2: belong to the company => customer_id2
+	
+	pb: on veut que seul le owner du PM peut manager le PM. (Il suffit qu'un nouveau user renseigne un vatid d'une company déjà enregistrer)
+	*/
+	const paymentElementOptions = {
+	  layout: 'accordion',
+	  defaultValues: {
+		billingDetails: {
+		  email: 'customer@example.com'
+		}
+	  },
+	};
+
+      const paymentElement = elements.create("payment", paymentElementOptions)
+      paymentElement.mount("#payment-element");
+
+      const form = document.getElementById("payment-form");
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        document.getElementById("submit").disabled = true;
+
+        const { error } = await stripe.confirmPayment({
+          elements,
+          confirmParams: {
+			<!-- payment_method_data: { -->
+				<!-- allow_redisplay: "always", -->
+			<!-- }, -->
+            return_url: "http://localhost:8080/success", // callback de succès
+          }
+        });
+
+        if (error) {
+          document.getElementById("error-message").textContent = error.message;
+          document.getElementById("submit").disabled = false;
+        }
+      });
+    }
+
+    init();
+  </script>
+</body>
+</html>
