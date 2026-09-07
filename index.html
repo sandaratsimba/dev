@@ -17,7 +17,7 @@
   </style>
 </head>
 <body>
-  <h2>Payment with Payment Element test </h2>
+  <h2>Payment with Payment Element test v2</h2>
 
   <form id="payment-form" style="width:500px">
     <div id="payment-element"><!-- Stripe injectera son UI --></div>
@@ -41,8 +41,8 @@
       // ⚠️ Ici tu dois appeler ton backend qui crée un PaymentIntent
       // Pour le test rapide, on simule une réponse
 	  // ideal: pi_3SopInE71IYytE7r1RjTMzW5_secret_nMOVYPZP2Fgte45EcQgtWwYX3
-      const clientSecret = "pi_3UD7EWE71IYytE7r1h9mrdSo_secret_eTDBoDlaQbHuDCy5b7ow9c0pj";
-	  const customerSessionClientSecret = "cuss_secret_VDYLZwf9k2oM3mCR0Bg1YmoBqoF1TYYLowI6IEnRBwJjyRe";
+      const clientSecret = "pi_3UD7UcE71IYytE7r1jAfMyFK_secret_BhWF3zbX5N6DjjbBSNYSEZFbX";
+	  const customerSessionClientSecret = "cuss_secret_VDYb9lqIt9DiPtCB5fugGjtS0XtSGn5UWo30epeV7VqVXg0";
 
 	// mode classic: recommended options (dynamic payment method)
       const elements = stripe.elements({ clientSecret, customerSessionClientSecret, allowsDelayedPaymentMethods: true });
