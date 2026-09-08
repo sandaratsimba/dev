@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Stripe SetupIntent Payment Method Test</title>
+		<script src="https://js.stripe.com/v3"></script>
+		<style>
+body { font-family: Arial, sans-serif; padding: 30px; }
+#payment-element { margin-bottom: 20px; }
+#submit {
+	background: #5469d4; color: #fff; border: none;
+	border-radius: 4px; padding: 10px 15px; font-size: 16px;
+	cursor: pointer;
+}
+		#submit:disabled { opacity: 0.5; cursor: not-allowed; }
+		#error-message { color: red; margin-top: 10px; }
+		#success-message { color: green; margin-top: 10px; }
+		</style>
+	</head>
+	<body>
+		<h2>MY ACCOUNT - Ajouter / voir les moyens de paiement</h2>
+
+		<form id="payment-form" style="width:500px">
+			<div id="payment-element"></div>
+			<button id="submit">Enregistrer le moyen de paiement</button>
+			<div id="error-message"></div>
+			<div id="success-message"></div>
+		</form>
+
+		<script>
+			const stripe = Stripe("pk_test_51Mb2i6E71IYytE7r655dX720ARtZaBmrYMVV6GBgNkQXpPOp7o638GFJuGgR86iGdBGPcXbpfc8c5AMVs2j5WnZO00tI2njFd9");
+
+			async function init() {
+				// SetupIntent client_secret, pas PaymentIntent.
+				// Format attendu : seti_xxx_secret_xxx
+				const setupIntentClientSecret = "seti_1UDMCbE71IYytE7rRbubcWxu_secret_VDnos1BAORqHBaxMdIChAVjQHez6Qqb";
+
+				// CustomerSession client_secret.
+				// Format attendu : cuss_secret_xxx
+				const customerSessionClientSecret = "cuss_secret_VDnoDXhoIb0eEIXiyqVyiuipn8Ajrld8R6n5U3OXeqPTJV5";
+
+				const elements = stripe.elements({
+					clientSecret: setupIntentClientSecret,
+					customerSessionClientSecret
+				});
+
+				const paymentElement = elements.create("payment", {
+					layout: "tabs"
+				});
+
+				paymentElement.mount("#payment-element");
+
+				const form = document.getElementById("payment-form");
+				const submitButton = document.getElementById("submit");
+				const errorMessage = document.getElementById("error-message");
+				const successMessage = document.getElementById("success-message");
+
+				form.addEventListener("submit", async (e) => {
+					e.preventDefault();
+
+					submitButton.disabled = true;
+					errorMessage.textContent = "";
+					successMessage.textContent = "";
+
+					const { error } = await stripe.confirmSetup({
+						elements,
+						confirmParams: {
+							return_url: "http://localhost:8080/payment-method/success",
+						},
+						redirect: "if_required"
+					});
+
+					if (error) {
+						errorMessage.textContent = error.message;
+						submitButton.disabled = false;
+						return;
+					}
+
+					successMessage.textContent = "Moyen de paiement enregistré avec succès.";
+					submitButton.disabled = false;
+				});
+			}
+
+			init();
+		</script>
+	</body>
+</html>
